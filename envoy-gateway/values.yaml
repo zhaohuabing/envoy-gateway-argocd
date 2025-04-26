@@ -1,0 +1,18 @@
+certgen:
+  rbac:
+    annotations:
+      argocd.argoproj.io/sync-wave: "-1"  # Ensure rbac is created before the certgen job. This is a workaround for https://github.com/envoyproxy/gateway/issues/5223
+deployment:
+  envoyGateway:
+    resources:
+      limits:
+        cpu: 700m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+config:
+  envoyGateway:
+    logging:
+      level:
+        default: debug

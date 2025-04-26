@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: envoy-gateway
+  namespace: argocd
+spec:
+  project: default
+  source:
+    helm:
+      valuesObject:
+        certgen:
+          rbac:
+            annotations:
+              argocd.argoproj.io/sync-wave: "-1"  # Ensure rbac is created before the certgen job. This is a workaround for https://github.com/envoyproxy/gateway/issues/5223
+        deployment:
+          envoyGateway:
+            resources:
+              limits:
+                cpu: 700m
+                memory: 256Mi
+      valueFiles:
+      - values.yaml
+    chart: gateway-helm
+    path: gateway-helm
+    repoURL: docker.io/envoyproxy
+    targetRevision: v0.0.0-latest
+  destination:
+    namespace: envoy-gateway-system
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
