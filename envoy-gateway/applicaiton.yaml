@@ -5,7 +5,11 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
+  sources:
+  - repoURL: docker.io/envoyproxy
+    chart: gateway-helm
+    path: gateway-helm
+    targetRevision: v0.0.0-latest
     helm:
       valuesObject:
         certgen:
@@ -19,15 +23,16 @@ spec:
                 cpu: 700m
                 memory: 256Mi
       valueFiles:
-      - values.yaml
-    chart: gateway-helm
-    path: gateway-helm
-    repoURL: docker.io/envoyproxy
-    targetRevision: v0.0.0-latest
+      - $values/envoy-gateway/values.yaml
+  - repoURL: 'https://github.com/zhaohuabing/envoy-gateway-argocd.git'
+    ref: values
   destination:
     namespace: envoy-gateway-system
     server: https://kubernetes.default.svc
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
     - CreateNamespace=true
     - ServerSideApply=true
